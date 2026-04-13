@@ -52,6 +52,10 @@ input:focus { border-color: var(--accent); }
 input[type="number"] { -moz-appearance: textfield; }
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button { -webkit-appearance: none; }
+input:disabled {
+  opacity: 0.6;
+  background: var(--surface);
+}
 
 /* Nav */
 .nav {
@@ -99,9 +103,18 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
 }
 .day-card:active { border-color: var(--accent); }
 .day-card.today { border-color: var(--accent); }
+.day-card.completed { border-color: var(--success); }
 .day-name { font-weight: 600; font-size: 15px; }
 .day-label { font-size: 13px; color: var(--text2); margin-top: 2px; }
 .day-count { font-size: 12px; color: var(--text2); }
+.day-status {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+.day-status.done { background: var(--success); color: #000; }
+.day-status.pending { background: var(--surface2); color: var(--text2); }
 .arrow { color: var(--text2); font-size: 18px; }
 
 /* Day detail */
@@ -141,7 +154,7 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
   cursor: pointer;
 }
 .exercise-name { font-weight: 600; font-size: 15px; flex: 1; }
-.exercise-actions { display: flex; gap: 4px; }
+.exercise-actions { display: flex; gap: 4px; align-items: center; }
 .exercise-actions button {
   padding: 4px 8px;
   font-size: 13px;
@@ -210,7 +223,41 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
   white-space: nowrap;
 }
 .btn-primary:active { background: var(--accent2); }
+.btn-success {
+  background: var(--success);
+  color: #000;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-weight: 700;
+  width: 100%;
+  margin-top: 16px;
+}
+.btn-success:active { opacity: 0.8; }
+.btn-outline {
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  width: 100%;
+  margin-top: 16px;
+}
+.btn-outline:active { background: var(--surface2); }
 .btn-danger { color: var(--danger); }
+
+/* Completed banner */
+.completed-banner {
+  background: var(--success);
+  color: #000;
+  text-align: center;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
 
 /* Progress */
 .progress-exercise {
@@ -263,10 +310,30 @@ canvas { width: 100% !important; height: 100% !important; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 0;
+  padding: 8px 0;
+  font-size: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.edit-exercise-item:last-of-type { border-bottom: none; }
+.edit-exercise-item button { color: var(--danger); font-size: 13px; padding: 4px 8px; }
+.edit-exercise-info { flex: 1; }
+.edit-exercise-name { font-weight: 600; }
+.edit-exercise-targets {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  align-items: center;
+}
+.edit-exercise-targets input {
+  width: 60px;
+  text-align: center;
+  padding: 6px 4px;
   font-size: 14px;
 }
-.edit-exercise-item button { color: var(--danger); font-size: 13px; padding: 4px 8px; }
+.edit-exercise-targets .target-label {
+  font-size: 12px;
+  color: var(--text2);
+}
 
 /* Modal */
 .modal-overlay {
@@ -329,11 +396,9 @@ select {
     <h2 id="day-title"></h2>
     <button class="label-edit" onclick="editDayLabel()">Edit Label</button>
   </div>
+  <div id="day-completed-banner"></div>
   <div id="day-exercises"></div>
-  <div class="add-exercise-row">
-    <input id="new-exercise-input" placeholder="New exercise name" />
-    <button class="btn-primary" onclick="addExercise()">Add</button>
-  </div>
+  <div id="day-actions"></div>
 </div>
 
 <div id="page-progress" class="page">
@@ -380,12 +445,29 @@ const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sun
 // ---- Data Layer ----
 function getWeekPlan() {
   const saved = localStorage.getItem('wt_plan');
-  if (saved) return JSON.parse(saved);
+  if (saved) {
+    const plan = JSON.parse(saved);
+    // Migrate old string exercises to objects
+    let needsSave = false;
+    plan.forEach(d => {
+      d.exercises = d.exercises.map(ex => {
+        if (typeof ex === 'string') {
+          needsSave = true;
+          return { name: ex, targetSets: 3, targetReps: 10 };
+        }
+        return ex;
+      });
+    });
+    if (needsSave) savePlan(plan);
+    return plan;
+  }
   const plan = DAYS.map(d => ({ day: d, label: '', exercises: [] }));
   savePlan(plan);
   return plan;
 }
 function savePlan(plan) { localStorage.setItem('wt_plan', JSON.stringify(plan)); }
+
+function getExName(ex) { return typeof ex === 'string' ? ex : ex.name; }
 
 function getLogs() {
   const saved = localStorage.getItem('wt_logs');
@@ -400,7 +482,7 @@ function getDateKey() {
 
 function getTodayDayIndex() {
   const jsDay = new Date().getDay();
-  return jsDay === 0 ? 6 : jsDay - 1; // Monday=0
+  return jsDay === 0 ? 6 : jsDay - 1;
 }
 
 function getDayLog(dayIndex, dateKey) {
@@ -417,6 +499,17 @@ function saveDayLog(dayIndex, exerciseLogs, dateKey) {
   saveLogs(logs);
 }
 
+function isCompleted(dayIndex, dateKey) {
+  const log = getDayLog(dayIndex, dateKey);
+  return log._completed === true;
+}
+
+function setCompleted(dayIndex, completed, dateKey) {
+  const log = getDayLog(dayIndex, dateKey || getDateKey());
+  log._completed = completed;
+  saveDayLog(dayIndex, log, dateKey || getDateKey());
+}
+
 function getLastLog(dayIndex, exerciseName) {
   const logs = getLogs();
   const today = getDateKey();
@@ -428,6 +521,38 @@ function getLastLog(dayIndex, exerciseName) {
     }
   }
   return null;
+}
+
+// Pre-load sets for an exercise based on plan targets + previous weights
+function preloadSets(dayIndex, exercise) {
+  const name = exercise.name;
+  const targetSets = exercise.targetSets || 3;
+  const targetReps = exercise.targetReps || 10;
+  const prev = getLastLog(dayIndex, name);
+  const sets = [];
+  for (let i = 0; i < targetSets; i++) {
+    const prevWeight = (prev && prev.sets[i] && prev.sets[i].weight) ? prev.sets[i].weight : '';
+    sets.push({ weight: prevWeight, reps: targetReps });
+  }
+  return sets;
+}
+
+// Ensure today's log has pre-loaded sets for all exercises
+function ensurePreloaded(dayIndex) {
+  const plan = getWeekPlan();
+  const day = plan[dayIndex];
+  const dateKey = getDateKey();
+  const log = getDayLog(dayIndex, dateKey);
+  let changed = false;
+  day.exercises.forEach(ex => {
+    const name = ex.name;
+    if (!log[name] || log[name].length === 0) {
+      log[name] = preloadSets(dayIndex, ex);
+      changed = true;
+    }
+  });
+  if (changed) saveDayLog(dayIndex, log, dateKey);
+  return log;
 }
 
 // ---- State ----
@@ -453,6 +578,13 @@ function openDay(dayIndex) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-day').classList.add('active');
   expandedExercises = new Set();
+  // Pre-load sets if needed
+  const plan = getWeekPlan();
+  if (plan[dayIndex].exercises.length > 0) {
+    ensurePreloaded(dayIndex);
+    // Auto-expand all exercises
+    plan[dayIndex].exercises.forEach((_, i) => expandedExercises.add(i));
+  }
   renderDay();
 }
 
@@ -467,23 +599,46 @@ function getWeekDates() {
   });
 }
 
+function getWeekDateKeys() {
+  const today = new Date();
+  const todayIdx = getTodayDayIndex();
+  return DAYS.map((_, i) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + (i - todayIdx));
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  });
+}
+
 function renderWeek() {
   const plan = getWeekPlan();
   const todayIdx = getTodayDayIndex();
   const weekDates = getWeekDates();
+  const weekDateKeys = getWeekDateKeys();
   const list = document.getElementById('week-list');
-  list.innerHTML = plan.map((d, i) => `
-    <div class="day-card ${i === todayIdx ? 'today' : ''}" onclick="openDay(${i})">
-      <div>
-        <div class="day-name">${d.day}${i === todayIdx ? ' (Today)' : ''} <span style="font-weight:400;color:var(--text2);font-size:13px">${weekDates[i]}</span></div>
-        <div class="day-label">${d.label || 'No label'}</div>
+  list.innerHTML = plan.map((d, i) => {
+    const done = isCompleted(i, weekDateKeys[i]);
+    const hasExercises = d.exercises.length > 0;
+    const cardClass = done ? 'completed' : (i === todayIdx ? 'today' : '');
+    let statusHtml = '';
+    if (hasExercises) {
+      statusHtml = done
+        ? '<span class="day-status done">Done</span>'
+        : (i <= todayIdx ? '<span class="day-status pending">Pending</span>' : '');
+    }
+    return `
+      <div class="day-card ${cardClass}" onclick="openDay(${i})">
+        <div>
+          <div class="day-name">${d.day}${i === todayIdx ? ' (Today)' : ''} <span style="font-weight:400;color:var(--text2);font-size:13px">${weekDates[i]}</span></div>
+          <div class="day-label">${d.label || 'No label'}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${statusHtml}
+          <span class="day-count">${d.exercises.length} exercise${d.exercises.length !== 1 ? 's' : ''}</span>
+          <span class="arrow">&#8250;</span>
+        </div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span class="day-count">${d.exercises.length} exercise${d.exercises.length !== 1 ? 's' : ''}</span>
-        <span class="arrow">&#8250;</span>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 // ---- Render: Day Detail ----
@@ -492,21 +647,28 @@ function renderDay() {
   const day = plan[currentDay];
   const dateKey = getDateKey();
   const log = getDayLog(currentDay, dateKey);
+  const completed = log._completed === true;
 
   const todayDate = new Date();
   const dateStr = todayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   document.getElementById('day-title').innerHTML = day.day + (day.label ? ' — ' + day.label : '') + '<div style="font-size:13px;color:var(--text2);font-weight:400;margin-top:2px">' + dateStr + '</div>';
 
+  // Completed banner
+  const bannerEl = document.getElementById('day-completed-banner');
+  bannerEl.innerHTML = completed ? '<div class="completed-banner">Workout Complete</div>' : '';
+
   const container = document.getElementById('day-exercises');
   if (day.exercises.length === 0) {
-    container.innerHTML = '<div class="empty">No exercises yet. Add one below.</div>';
+    container.innerHTML = '<div class="empty">No exercises yet. Go to the Plan tab to add exercises.</div>';
+    document.getElementById('day-actions').innerHTML = '';
     return;
   }
 
   container.innerHTML = day.exercises.map((ex, idx) => {
+    const name = ex.name;
     const isOpen = expandedExercises.has(idx);
-    const sets = log[ex] || [];
-    const prev = getLastLog(currentDay, ex);
+    const sets = log[name] || [];
+    const prev = getLastLog(currentDay, name);
 
     let body = '';
     if (isOpen) {
@@ -517,34 +679,52 @@ function renderDay() {
         prevHtml = '<div class="prev-label">No previous data</div>';
       }
 
+      const disabled = completed ? 'disabled' : '';
       const setsHtml = sets.map((s, si) => `
         <div class="set-row">
           <span class="set-num">${si+1}</span>
-          <input type="number" inputmode="decimal" placeholder="lbs" value="${s.weight || ''}" onchange="updateSet(${idx},'${esc(ex)}',${si},'weight',this.value)" />
+          <input type="number" inputmode="decimal" placeholder="lbs" value="${s.weight || ''}" ${disabled} onchange="updateSet(${idx},'${esc(name)}',${si},'weight',this.value)" />
           <span class="unit">lbs</span>
-          <input type="number" inputmode="numeric" placeholder="reps" value="${s.reps || ''}" onchange="updateSet(${idx},'${esc(ex)}',${si},'reps',this.value)" />
+          <input type="number" inputmode="numeric" placeholder="reps" value="${s.reps || ''}" ${disabled} onchange="updateSet(${idx},'${esc(name)}',${si},'reps',this.value)" />
           <span class="unit">reps</span>
-          <button class="remove-set" onclick="removeSet(${idx},'${esc(ex)}',${si})">&#215;</button>
+          ${completed ? '' : `<button class="remove-set" onclick="removeSet(${idx},'${esc(name)}',${si})">&#215;</button>`}
         </div>
       `).join('');
 
-      body = `<div class="exercise-body">${prevHtml}${setsHtml}<button class="btn-add-set" onclick="addSet(${idx},'${esc(ex)}')">+ Add Set</button></div>`;
+      const addBtn = completed ? '' : `<button class="btn-add-set" onclick="addSet(${idx},'${esc(name)}')">+ Add Set</button>`;
+      body = `<div class="exercise-body">${prevHtml}${setsHtml}${addBtn}</div>`;
     }
 
     return `
       <div class="exercise-card">
         <div class="exercise-header" onclick="toggleExercise(${idx})">
-          <span class="exercise-name">${ex}</span>
+          <span class="exercise-name">${name}</span>
           <div class="exercise-actions">
             <span style="font-size:13px;color:var(--text2)">${sets.length} set${sets.length !== 1 ? 's' : ''}</span>
-            <button class="btn-icon" onclick="event.stopPropagation();renameExercise(${idx})" title="Rename">&#9998;</button>
-            <button class="btn-icon btn-danger" onclick="event.stopPropagation();removeExercise(${idx})" title="Remove">&#215;</button>
           </div>
         </div>
         ${body}
       </div>
     `;
   }).join('');
+
+  // Actions: Finish / Edit button
+  const actionsEl = document.getElementById('day-actions');
+  if (completed) {
+    actionsEl.innerHTML = '<button class="btn-outline" onclick="editWorkout()">Edit Workout</button>';
+  } else {
+    actionsEl.innerHTML = '<button class="btn-success" onclick="finishWorkout()">Finish Workout</button>';
+  }
+}
+
+function finishWorkout() {
+  setCompleted(currentDay, true);
+  renderDay();
+}
+
+function editWorkout() {
+  setCompleted(currentDay, false);
+  renderDay();
 }
 
 function esc(s) { return s.replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
@@ -565,7 +745,7 @@ function addExercise() {
   const name = input.value.trim();
   if (!name) return;
   const plan = getWeekPlan();
-  plan[currentDay].exercises.push(name);
+  plan[currentDay].exercises.push({ name, targetSets: 3, targetReps: 10 });
   savePlan(plan);
   input.value = '';
   renderDay();
@@ -581,12 +761,11 @@ function removeExercise(idx) {
 
 function renameExercise(idx) {
   const plan = getWeekPlan();
-  const oldName = plan[currentDay].exercises[idx];
+  const oldName = plan[currentDay].exercises[idx].name;
   openModal('Rename Exercise', oldName, (newName) => {
     if (!newName.trim()) return;
-    plan[currentDay].exercises[idx] = newName.trim();
+    plan[currentDay].exercises[idx].name = newName.trim();
     savePlan(plan);
-    // Update logs too
     const logs = getLogs();
     for (const date in logs) {
       if (logs[date][currentDay] && logs[date][currentDay][oldName]) {
@@ -648,7 +827,15 @@ function renderPlan() {
       </div>
       ${d.exercises.map((ex, ei) => `
         <div class="edit-exercise-item">
-          <span>${ex}</span>
+          <div class="edit-exercise-info">
+            <div class="edit-exercise-name">${ex.name}</div>
+            <div class="edit-exercise-targets">
+              <input type="number" inputmode="numeric" value="${ex.targetSets}" onchange="updateTarget(${i},${ei},'targetSets',this.value)" />
+              <span class="target-label">sets</span>
+              <input type="number" inputmode="numeric" value="${ex.targetReps}" onchange="updateTarget(${i},${ei},'targetReps',this.value)" />
+              <span class="target-label">reps</span>
+            </div>
+          </div>
           <div>
             <button onclick="planRenameExercise(${i},${ei})">Rename</button>
             <button onclick="planRemoveExercise(${i},${ei})">Remove</button>
@@ -669,12 +856,18 @@ function updateLabel(dayIdx, val) {
   savePlan(plan);
 }
 
+function updateTarget(dayIdx, exIdx, field, value) {
+  const plan = getWeekPlan();
+  plan[dayIdx].exercises[exIdx][field] = parseInt(value) || 1;
+  savePlan(plan);
+}
+
 function planAddExercise(dayIdx) {
   const input = document.getElementById('plan-add-' + dayIdx);
   const name = input.value.trim();
   if (!name) return;
   const plan = getWeekPlan();
-  plan[dayIdx].exercises.push(name);
+  plan[dayIdx].exercises.push({ name, targetSets: 3, targetReps: 10 });
   savePlan(plan);
   input.value = '';
   renderPlan();
@@ -689,10 +882,10 @@ function planRemoveExercise(dayIdx, exIdx) {
 
 function planRenameExercise(dayIdx, exIdx) {
   const plan = getWeekPlan();
-  const oldName = plan[dayIdx].exercises[exIdx];
+  const oldName = plan[dayIdx].exercises[exIdx].name;
   openModal('Rename Exercise', oldName, (newName) => {
     if (!newName.trim()) return;
-    plan[dayIdx].exercises[exIdx] = newName.trim();
+    plan[dayIdx].exercises[exIdx].name = newName.trim();
     savePlan(plan);
     const logs = getLogs();
     for (const date in logs) {
@@ -710,7 +903,7 @@ function planRenameExercise(dayIdx, exIdx) {
 function renderProgressSelect() {
   const plan = getWeekPlan();
   const exerciseSet = new Set();
-  plan.forEach(d => d.exercises.forEach(ex => exerciseSet.add(ex)));
+  plan.forEach(d => d.exercises.forEach(ex => exerciseSet.add(ex.name)));
   const exercises = [...exerciseSet].sort();
 
   const select = document.getElementById('progress-exercise-select');
@@ -734,9 +927,8 @@ function renderProgress() {
   const plan = getWeekPlan();
   const entries = [];
 
-  // Find which day indices have this exercise
   const dayIndices = [];
-  plan.forEach((d, i) => { if (d.exercises.includes(exerciseName)) dayIndices.push(i); });
+  plan.forEach((d, i) => { if (d.exercises.some(ex => ex.name === exerciseName)) dayIndices.push(i); });
 
   const dates = Object.keys(logs).sort();
   for (const date of dates) {
@@ -754,7 +946,6 @@ function renderProgress() {
     return;
   }
 
-  // Chart: max weight over time
   const chartData = entries.map(e => ({
     date: e.date,
     maxWeight: Math.max(...e.sets.map(s => parseFloat(s.weight) || 0)),
@@ -763,7 +954,6 @@ function renderProgress() {
 
   let html = `<div class="chart-container"><canvas id="progress-chart"></canvas></div>`;
 
-  // History list (most recent first)
   html += entries.slice().reverse().map(e => `
     <div class="history-entry">
       <div class="history-date">${formatDateFull(e.date)}</div>
@@ -804,7 +994,6 @@ function drawChart(data) {
 
   ctx.clearRect(0, 0, w, h);
 
-  // Grid lines
   ctx.strokeStyle = '#2a2a4a';
   ctx.lineWidth = 0.5;
   for (let i = 0; i <= 4; i++) {
@@ -820,7 +1009,6 @@ function drawChart(data) {
   }
 
   if (data.length === 1) {
-    // Single dot
     const x = pad.left + cw / 2;
     const y = pad.top + ch / 2;
     ctx.fillStyle = '#6c63ff';
@@ -830,7 +1018,6 @@ function drawChart(data) {
     return;
   }
 
-  // Line
   ctx.strokeStyle = '#6c63ff';
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -842,7 +1029,6 @@ function drawChart(data) {
   });
   ctx.stroke();
 
-  // Dots
   data.forEach((d, i) => {
     const x = pad.left + (cw * i / (data.length - 1));
     const y = pad.top + ch - (ch * (d.maxWeight - minW) / range);
@@ -852,7 +1038,6 @@ function drawChart(data) {
     ctx.fill();
   });
 
-  // Date labels (first and last)
   ctx.fillStyle = '#666';
   ctx.font = '10px system-ui';
   ctx.textAlign = 'start';
@@ -887,19 +1072,11 @@ function closeModal() {
   document.getElementById('modal').classList.remove('active');
 }
 
-// Handle enter key on new exercise input
-document.getElementById('new-exercise-input').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') addExercise();
-});
-
 // ---- Init ----
-// Auto-open today's workout with all exercises expanded
-const todayIdx = getTodayDayIndex();
-const todayPlan = getWeekPlan()[todayIdx];
-if (todayPlan.exercises.length > 0) {
-  openDay(todayIdx);
-  todayPlan.exercises.forEach((_, i) => expandedExercises.add(i));
-  renderDay();
+const initTodayIdx = getTodayDayIndex();
+const initTodayPlan = getWeekPlan()[initTodayIdx];
+if (initTodayPlan.exercises.length > 0) {
+  openDay(initTodayIdx);
 } else {
   renderWeek();
 }
