@@ -457,14 +457,25 @@ function openDay(dayIndex) {
 }
 
 // ---- Render: Week ----
+function getWeekDates() {
+  const today = new Date();
+  const todayIdx = getTodayDayIndex();
+  return DAYS.map((_, i) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + (i - todayIdx));
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  });
+}
+
 function renderWeek() {
   const plan = getWeekPlan();
   const todayIdx = getTodayDayIndex();
+  const weekDates = getWeekDates();
   const list = document.getElementById('week-list');
   list.innerHTML = plan.map((d, i) => `
     <div class="day-card ${i === todayIdx ? 'today' : ''}" onclick="openDay(${i})">
       <div>
-        <div class="day-name">${d.day}${i === todayIdx ? ' (Today)' : ''}</div>
+        <div class="day-name">${d.day}${i === todayIdx ? ' (Today)' : ''} <span style="font-weight:400;color:var(--text2);font-size:13px">${weekDates[i]}</span></div>
         <div class="day-label">${d.label || 'No label'}</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
@@ -482,7 +493,9 @@ function renderDay() {
   const dateKey = getDateKey();
   const log = getDayLog(currentDay, dateKey);
 
-  document.getElementById('day-title').textContent = day.day + (day.label ? ' — ' + day.label : '');
+  const todayDate = new Date();
+  const dateStr = todayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  document.getElementById('day-title').innerHTML = day.day + (day.label ? ' — ' + day.label : '') + '<div style="font-size:13px;color:var(--text2);font-weight:400;margin-top:2px">' + dateStr + '</div>';
 
   const container = document.getElementById('day-exercises');
   if (day.exercises.length === 0) {
@@ -880,7 +893,16 @@ document.getElementById('new-exercise-input').addEventListener('keydown', (e) =>
 });
 
 // ---- Init ----
-renderWeek();
+// Auto-open today's workout with all exercises expanded
+const todayIdx = getTodayDayIndex();
+const todayPlan = getWeekPlan()[todayIdx];
+if (todayPlan.exercises.length > 0) {
+  openDay(todayIdx);
+  todayPlan.exercises.forEach((_, i) => expandedExercises.add(i));
+  renderDay();
+} else {
+  renderWeek();
+}
 
 // Service worker registration
 if ('serviceWorker' in navigator) {
