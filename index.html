@@ -5,22 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#1a1a2e">
+<meta name="theme-color" content="#0f1a2e">
 <title>Workout Tracker</title>
 <link rel="manifest" href="manifest.json">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 :root {
-  --bg: #0f0f1a;
-  --surface: #1a1a2e;
-  --surface2: #232340;
-  --border: #2a2a4a;
-  --text: #e0e0e0;
-  --text2: #888;
-  --accent: #6c63ff;
-  --accent2: #8b83ff;
+  --bg: #0a1020;
+  --surface: #131e35;
+  --surface2: #1d2a44;
+  --border: #2a3a5a;
+  --text: #e5e9f2;
+  --text2: #8a9ab5;
+  --accent: #3b5dc9;       /* navy */
+  --accent2: #5577e0;
+  --accent-soft: #1d2c4f;
   --danger: #ff4757;
-  --success: #2ed573;
+  --success: #d4a519;      /* gold */
+  --success2: #e6b933;
+  --success-soft: #3a2d0a;
 }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
@@ -80,13 +83,56 @@ input:disabled {
   color: var(--text2);
   transition: color 0.2s;
 }
-.nav button.active { color: var(--accent); }
+.nav button.active { color: var(--accent2); }
 .nav button svg { width: 24px; height: 24px; }
 
 /* Pages */
 .page { display: none; padding: 16px 16px 80px; max-width: 600px; margin: 0 auto; }
 .page.active { display: block; }
 .page-title { font-size: 24px; font-weight: 700; margin-bottom: 16px; }
+
+/* Week navigation */
+.week-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+.week-nav-arrow {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 18px;
+  color: var(--text);
+}
+.week-nav-arrow:active { background: var(--surface2); }
+.week-nav-label {
+  flex: 1;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+}
+.week-nav-label .sub {
+  font-size: 12px;
+  color: var(--text2);
+  font-weight: 400;
+  display: block;
+  margin-top: 2px;
+}
+.btn-today {
+  font-size: 12px;
+  color: var(--accent2);
+  padding: 6px 10px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
 
 /* Week view */
 .day-card {
@@ -102,7 +148,7 @@ input:disabled {
   transition: border-color 0.2s;
 }
 .day-card:active { border-color: var(--accent); }
-.day-card.today { border-color: var(--accent); }
+.day-card.today { border-color: var(--accent2); }
 .day-card.completed { border-color: var(--success); }
 .day-name { font-weight: 600; font-size: 15px; }
 .day-label { font-size: 13px; color: var(--text2); margin-top: 2px; }
@@ -122,7 +168,7 @@ input:disabled {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--accent);
+  color: var(--accent2);
   font-size: 14px;
   padding: 8px 0;
   margin-bottom: 8px;
@@ -136,7 +182,7 @@ input:disabled {
 .day-header h2 { font-size: 20px; font-weight: 700; }
 .label-edit {
   font-size: 13px;
-  color: var(--accent);
+  color: var(--accent2);
   padding: 4px 8px;
 }
 .exercise-card {
@@ -145,7 +191,9 @@ input:disabled {
   border-radius: 12px;
   margin-bottom: 12px;
   overflow: hidden;
+  transition: opacity 0.2s;
 }
+.exercise-card.skipped { opacity: 0.5; }
 .exercise-header {
   display: flex;
   align-items: center;
@@ -154,12 +202,22 @@ input:disabled {
   cursor: pointer;
 }
 .exercise-name { font-weight: 600; font-size: 15px; flex: 1; }
+.exercise-name .skip-tag {
+  font-size: 11px;
+  color: var(--text2);
+  font-weight: 500;
+  margin-left: 6px;
+}
 .exercise-actions { display: flex; gap: 4px; align-items: center; }
-.exercise-actions button {
-  padding: 4px 8px;
-  font-size: 13px;
+.btn-skip {
+  font-size: 12px;
+  color: var(--text2);
+  padding: 4px 10px;
+  border: 1px solid var(--border);
   border-radius: 6px;
 }
+.btn-skip:active { background: var(--surface2); }
+.btn-skip.undo { color: var(--accent2); border-color: var(--accent); }
 .btn-icon {
   width: 32px;
   height: 32px;
@@ -183,18 +241,31 @@ input:disabled {
 .set-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 6px;
 }
 .set-num {
   font-size: 12px;
   color: var(--text2);
-  width: 20px;
+  width: 18px;
   text-align: center;
   flex-shrink: 0;
 }
-.set-row input { width: 80px; text-align: center; padding: 8px 6px; }
-.set-row .unit { font-size: 12px; color: var(--text2); flex-shrink: 0; }
+.prev-weight-box {
+  min-width: 42px;
+  text-align: center;
+  padding: 8px 6px;
+  font-size: 13px;
+  color: var(--text2);
+  background: var(--surface2);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  flex-shrink: 0;
+  font-weight: 500;
+}
+.prev-weight-box.empty { color: #555; }
+.set-row input { width: 70px; text-align: center; padding: 8px 6px; }
+.set-row .unit { font-size: 11px; color: var(--text2); flex-shrink: 0; }
 .remove-set {
   color: var(--danger);
   font-size: 18px;
@@ -204,9 +275,42 @@ input:disabled {
 }
 .btn-add-set {
   font-size: 13px;
-  color: var(--accent);
+  color: var(--accent2);
   padding: 8px 0;
 }
+
+/* Effort rating */
+.effort-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.effort-label {
+  font-size: 12px;
+  color: var(--text2);
+  margin-right: 4px;
+}
+.effort-btn {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  color: var(--text2);
+  background: var(--surface2);
+  transition: all 0.15s;
+}
+.effort-btn:active { background: var(--surface); }
+.effort-btn.selected {
+  background: var(--success);
+  border-color: var(--success);
+  color: #000;
+  font-weight: 600;
+}
+
 .add-exercise-row {
   display: flex;
   gap: 8px;
@@ -233,10 +337,10 @@ input:disabled {
   width: 100%;
   margin-top: 16px;
 }
-.btn-success:active { opacity: 0.8; }
+.btn-success:active { background: var(--success2); }
 .btn-outline {
   border: 1px solid var(--accent);
-  color: var(--accent);
+  color: var(--accent2);
   border-radius: 8px;
   padding: 12px 16px;
   font-size: 15px;
@@ -252,31 +356,73 @@ input:disabled {
   background: var(--success);
   color: #000;
   text-align: center;
-  padding: 8px;
+  padding: 10px;
   border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
   margin-bottom: 12px;
 }
 
-/* Progress */
-.progress-exercise {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  margin-bottom: 12px;
-  overflow: hidden;
-}
-.progress-exercise-header {
-  padding: 12px 16px;
-  font-weight: 600;
-  font-size: 15px;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
+/* Finish animation overlay */
+.finish-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
   align-items: center;
+  justify-content: center;
+  background: rgba(10, 16, 32, 0.85);
+  z-index: 300;
+  pointer-events: none;
 }
-.progress-exercise-body { padding: 0 16px 12px; }
+.finish-overlay.active {
+  display: flex;
+  animation: fadeOut 1.6s ease forwards;
+}
+.finish-check {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: popIn 0.5s cubic-bezier(0.22, 1.36, 0.6, 1.2) forwards;
+  box-shadow: 0 0 60px rgba(212, 165, 25, 0.6);
+}
+.finish-check svg {
+  width: 60px;
+  height: 60px;
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+  animation: drawCheck 0.4s ease forwards 0.25s;
+}
+.confetti {
+  position: absolute;
+  width: 8px;
+  height: 14px;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+  opacity: 0;
+  animation: confettiBurst 1.2s ease-out forwards 0.1s;
+}
+@keyframes popIn {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes drawCheck {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes fadeOut {
+  0%, 70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes confettiBurst {
+  0% { transform: translate(0,0) rotate(0); opacity: 1; }
+  100% { transform: translate(var(--cx), var(--cy)) rotate(var(--cr)); opacity: 0; }
+}
+
+/* Progress */
 .history-entry {
   padding: 8px 0;
   border-bottom: 1px solid var(--border);
@@ -313,11 +459,12 @@ canvas { width: 100% !important; height: 100% !important; }
   padding: 8px 0;
   font-size: 14px;
   border-bottom: 1px solid var(--border);
+  gap: 8px;
 }
 .edit-exercise-item:last-of-type { border-bottom: none; }
 .edit-exercise-item button { color: var(--danger); font-size: 13px; padding: 4px 8px; }
-.edit-exercise-info { flex: 1; }
-.edit-exercise-name { font-weight: 600; }
+.edit-exercise-info { flex: 1; min-width: 0; }
+.edit-exercise-name { font-weight: 600; word-break: break-word; }
 .edit-exercise-targets {
   display: flex;
   gap: 6px;
@@ -325,7 +472,7 @@ canvas { width: 100% !important; height: 100% !important; }
   align-items: center;
 }
 .edit-exercise-targets input {
-  width: 60px;
+  width: 56px;
   text-align: center;
   padding: 6px 4px;
   font-size: 14px;
@@ -386,7 +533,13 @@ select {
 <body>
 
 <div id="page-week" class="page active">
-  <h1 class="page-title">This Week</h1>
+  <h1 class="page-title">Workouts</h1>
+  <div class="week-nav">
+    <button class="week-nav-arrow" onclick="changeWeek(-1)">&#8249;</button>
+    <div class="week-nav-label" id="week-nav-label"></div>
+    <button class="week-nav-arrow" onclick="changeWeek(1)">&#8250;</button>
+  </div>
+  <button id="btn-today" class="btn-today" style="display:none" onclick="goToCurrentWeek()">Jump to This Week</button>
   <div id="week-list"></div>
 </div>
 
@@ -427,6 +580,15 @@ select {
   </button>
 </nav>
 
+<!-- Finish animation overlay -->
+<div class="finish-overlay" id="finish-overlay">
+  <div class="finish-check">
+    <svg viewBox="0 0 50 50" fill="none" stroke="#000" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="12,26 22,36 38,16" />
+    </svg>
+  </div>
+</div>
+
 <!-- Modal -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
@@ -441,19 +603,20 @@ select {
 
 <script>
 const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const DEFAULT_SETS = 4;
+const DEFAULT_REPS = 8;
 
 // ---- Data Layer ----
 function getWeekPlan() {
   const saved = localStorage.getItem('wt_plan');
   if (saved) {
     const plan = JSON.parse(saved);
-    // Migrate old string exercises to objects
     let needsSave = false;
     plan.forEach(d => {
       d.exercises = d.exercises.map(ex => {
         if (typeof ex === 'string') {
           needsSave = true;
-          return { name: ex, targetSets: 3, targetReps: 10 };
+          return { name: ex, targetSets: DEFAULT_SETS, targetReps: DEFAULT_REPS };
         }
         return ex;
       });
@@ -467,16 +630,14 @@ function getWeekPlan() {
 }
 function savePlan(plan) { localStorage.setItem('wt_plan', JSON.stringify(plan)); }
 
-function getExName(ex) { return typeof ex === 'string' ? ex : ex.name; }
-
 function getLogs() {
   const saved = localStorage.getItem('wt_logs');
   return saved ? JSON.parse(saved) : {};
 }
 function saveLogs(logs) { localStorage.setItem('wt_logs', JSON.stringify(logs)); }
 
-function getDateKey() {
-  const d = new Date();
+function getDateKey(date) {
+  const d = date || new Date();
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
 
@@ -505,59 +666,73 @@ function isCompleted(dayIndex, dateKey) {
 }
 
 function setCompleted(dayIndex, completed, dateKey) {
-  const log = getDayLog(dayIndex, dateKey || getDateKey());
+  const key = dateKey || getDateKey();
+  const log = getDayLog(dayIndex, key);
   log._completed = completed;
-  saveDayLog(dayIndex, log, dateKey || getDateKey());
+  saveDayLog(dayIndex, log, key);
 }
 
-function getLastLog(dayIndex, exerciseName) {
+// Find the previous logged session for an exercise (before given date)
+function getLastLog(dayIndex, exerciseName, beforeDate) {
   const logs = getLogs();
-  const today = getDateKey();
-  const dates = Object.keys(logs).filter(d => d < today).sort().reverse();
+  const cutoff = beforeDate || getDateKey();
+  const dates = Object.keys(logs).filter(d => d < cutoff).sort().reverse();
   for (const date of dates) {
     if (logs[date] && logs[date][dayIndex]) {
       const ex = logs[date][dayIndex][exerciseName];
-      if (ex && ex.length > 0) return { date, sets: ex };
+      if (ex && Array.isArray(ex) && ex.length > 0) {
+        // Only return if it actually has values
+        const hasData = ex.some(s => s.weight || s.reps);
+        if (hasData) return { date, sets: ex };
+      }
     }
   }
   return null;
 }
 
-// Pre-load sets for an exercise based on plan targets + previous weights
-function preloadSets(dayIndex, exercise) {
-  const name = exercise.name;
-  const targetSets = exercise.targetSets || 3;
-  const targetReps = exercise.targetReps || 10;
-  const prev = getLastLog(dayIndex, name);
-  const sets = [];
-  for (let i = 0; i < targetSets; i++) {
-    const prevWeight = (prev && prev.sets[i] && prev.sets[i].weight) ? prev.sets[i].weight : '';
-    sets.push({ weight: prevWeight, reps: targetReps });
+// Get previous weight for a specific set index
+function getPrevWeight(dayIndex, exerciseName, setIdx, beforeDate) {
+  const prev = getLastLog(dayIndex, exerciseName, beforeDate);
+  if (!prev) return '';
+  if (prev.sets[setIdx] && prev.sets[setIdx].weight) return prev.sets[setIdx].weight;
+  // Fall back to last set's weight if asked for a higher set number
+  for (let i = prev.sets.length - 1; i >= 0; i--) {
+    if (prev.sets[i].weight) return prev.sets[i].weight;
   }
-  return sets;
+  return '';
 }
 
-// Ensure today's log has pre-loaded sets for all exercises
-function ensurePreloaded(dayIndex) {
+// Sync the day's log with current plan (preload missing sets with prev weights)
+function syncDayWithPlan(dayIndex, dateKey) {
+  const key = dateKey || getDateKey();
   const plan = getWeekPlan();
   const day = plan[dayIndex];
-  const dateKey = getDateKey();
-  const log = getDayLog(dayIndex, dateKey);
+  const log = getDayLog(dayIndex, key);
   let changed = false;
   day.exercises.forEach(ex => {
     const name = ex.name;
-    if (!log[name] || log[name].length === 0) {
-      log[name] = preloadSets(dayIndex, ex);
+    const targetSets = ex.targetSets || DEFAULT_SETS;
+    const targetReps = ex.targetReps || DEFAULT_REPS;
+    if (!log[name] || !Array.isArray(log[name])) {
+      log[name] = [];
+      changed = true;
+    }
+    while (log[name].length < targetSets) {
+      const i = log[name].length;
+      const prevW = getPrevWeight(dayIndex, name, i, key);
+      log[name].push({ weight: prevW || '', reps: targetReps });
       changed = true;
     }
   });
-  if (changed) saveDayLog(dayIndex, log, dateKey);
+  if (changed) saveDayLog(dayIndex, log, key);
   return log;
 }
 
 // ---- State ----
 let currentDay = null;
+let currentDate = null;       // date key being viewed in day view
 let currentPage = 'week';
+let weekOffset = 0;            // 0 = current week, -1 last week, etc.
 let expandedExercises = new Set();
 
 // ---- Navigation ----
@@ -568,67 +743,91 @@ function showPage(page) {
   document.querySelectorAll('.nav button').forEach(b => {
     b.classList.toggle('active', b.dataset.page === page);
   });
-  if (page === 'week') { currentDay = null; renderWeek(); }
+  if (page === 'week') { currentDay = null; currentDate = null; renderWeek(); }
   if (page === 'progress') renderProgressSelect();
   if (page === 'plan') renderPlan();
 }
 
-function openDay(dayIndex) {
+function openDay(dayIndex, dateKey) {
   currentDay = dayIndex;
+  currentDate = dateKey || getDateKey();
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-day').classList.add('active');
   expandedExercises = new Set();
-  // Pre-load sets if needed
   const plan = getWeekPlan();
   if (plan[dayIndex].exercises.length > 0) {
-    ensurePreloaded(dayIndex);
-    // Auto-expand all exercises
+    syncDayWithPlan(dayIndex, currentDate);
     plan[dayIndex].exercises.forEach((_, i) => expandedExercises.add(i));
   }
   renderDay();
 }
 
+function changeWeek(delta) {
+  weekOffset += delta;
+  renderWeek();
+}
+
+function goToCurrentWeek() {
+  weekOffset = 0;
+  renderWeek();
+}
+
 // ---- Render: Week ----
-function getWeekDates() {
+function getWeekDateKeys(offset) {
   const today = new Date();
   const todayIdx = getTodayDayIndex();
   return DAYS.map((_, i) => {
     const d = new Date(today);
-    d.setDate(d.getDate() + (i - todayIdx));
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    d.setDate(d.getDate() + (i - todayIdx) + (offset * 7));
+    return getDateKey(d);
   });
 }
 
-function getWeekDateKeys() {
+function getWeekDisplayDates(offset) {
   const today = new Date();
   const todayIdx = getTodayDayIndex();
   return DAYS.map((_, i) => {
     const d = new Date(today);
-    d.setDate(d.getDate() + (i - todayIdx));
-    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    d.setDate(d.getDate() + (i - todayIdx) + (offset * 7));
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   });
 }
 
 function renderWeek() {
   const plan = getWeekPlan();
   const todayIdx = getTodayDayIndex();
-  const weekDates = getWeekDates();
-  const weekDateKeys = getWeekDateKeys();
+  const weekDateKeys = getWeekDateKeys(weekOffset);
+  const weekDisplayDates = getWeekDisplayDates(weekOffset);
+  const todayKey = getDateKey();
+
+  // Week navigation label
+  const firstDate = weekDisplayDates[0];
+  const lastDate = weekDisplayDates[6];
+  let weekLabel;
+  if (weekOffset === 0) weekLabel = 'This Week';
+  else if (weekOffset === -1) weekLabel = 'Last Week';
+  else if (weekOffset === 1) weekLabel = 'Next Week';
+  else weekLabel = (weekOffset < 0 ? Math.abs(weekOffset) + ' weeks ago' : weekOffset + ' weeks ahead');
+  document.getElementById('week-nav-label').innerHTML = weekLabel + '<span class="sub">' + firstDate + ' &ndash; ' + lastDate + '</span>';
+
+  document.getElementById('btn-today').style.display = (weekOffset === 0 ? 'none' : 'inline-block');
+
   const list = document.getElementById('week-list');
   list.innerHTML = plan.map((d, i) => {
-    const done = isCompleted(i, weekDateKeys[i]);
+    const dateKey = weekDateKeys[i];
+    const isToday = (weekOffset === 0 && i === todayIdx);
+    const done = isCompleted(i, dateKey);
     const hasExercises = d.exercises.length > 0;
-    const cardClass = done ? 'completed' : (i === todayIdx ? 'today' : '');
+    const cardClass = done ? 'completed' : (isToday ? 'today' : '');
     let statusHtml = '';
     if (hasExercises) {
-      statusHtml = done
-        ? '<span class="day-status done">Done</span>'
-        : (i <= todayIdx ? '<span class="day-status pending">Pending</span>' : '');
+      if (done) statusHtml = '<span class="day-status done">Done</span>';
+      else if (dateKey <= todayKey) statusHtml = '<span class="day-status pending">Pending</span>';
     }
     return `
-      <div class="day-card ${cardClass}" onclick="openDay(${i})">
+      <div class="day-card ${cardClass}" onclick="openDay(${i}, '${dateKey}')">
         <div>
-          <div class="day-name">${d.day}${i === todayIdx ? ' (Today)' : ''} <span style="font-weight:400;color:var(--text2);font-size:13px">${weekDates[i]}</span></div>
+          <div class="day-name">${d.day}${isToday ? ' (Today)' : ''} <span style="font-weight:400;color:var(--text2);font-size:13px">${weekDisplayDates[i]}</span></div>
           <div class="day-label">${d.label || 'No label'}</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
@@ -645,15 +844,14 @@ function renderWeek() {
 function renderDay() {
   const plan = getWeekPlan();
   const day = plan[currentDay];
-  const dateKey = getDateKey();
+  const dateKey = currentDate;
   const log = getDayLog(currentDay, dateKey);
   const completed = log._completed === true;
 
-  const todayDate = new Date();
-  const dateStr = todayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const viewedDate = new Date(dateKey + 'T00:00:00');
+  const dateStr = viewedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
   document.getElementById('day-title').innerHTML = day.day + (day.label ? ' — ' + day.label : '') + '<div style="font-size:13px;color:var(--text2);font-weight:400;margin-top:2px">' + dateStr + '</div>';
 
-  // Completed banner
   const bannerEl = document.getElementById('day-completed-banner');
   bannerEl.innerHTML = completed ? '<div class="completed-banner">Workout Complete</div>' : '';
 
@@ -666,41 +864,74 @@ function renderDay() {
 
   container.innerHTML = day.exercises.map((ex, idx) => {
     const name = ex.name;
+    const exLog = log[name];
     const isOpen = expandedExercises.has(idx);
-    const sets = log[name] || [];
-    const prev = getLastLog(currentDay, name);
+    const skipped = exLog && exLog._skipped;
+    const sets = (exLog && Array.isArray(exLog)) ? exLog : (exLog && Array.isArray(exLog.sets) ? exLog.sets : []);
+    // Note: log[name] is normally an array. Effort/skipped are stored as separate keys.
+    const effortKey = '_effort_' + name;
+    const skippedKey = '_skipped_' + name;
+    const currentEffort = log[effortKey];
+    const isSkipped = log[skippedKey] === true;
+    const prevLog = getLastLog(currentDay, name, dateKey);
 
     let body = '';
-    if (isOpen) {
+    if (isOpen && !isSkipped) {
       let prevHtml = '';
-      if (prev) {
-        prevHtml = `<div class="prev-label">Last time (${formatDate(prev.date)}):</div><div class="prev-sets">${prev.sets.map((s, i) => `Set ${i+1}: ${s.weight}lbs x ${s.reps}`).join('<br>')}</div>`;
+      if (prevLog) {
+        prevHtml = `<div class="prev-label">Last time (${formatDate(prevLog.date)}):</div><div class="prev-sets">${prevLog.sets.map((s, i) => `Set ${i+1}: ${s.weight || 0}lbs &times; ${s.reps || 0}`).join('<br>')}</div>`;
       } else {
         prevHtml = '<div class="prev-label">No previous data</div>';
       }
 
       const disabled = completed ? 'disabled' : '';
-      const setsHtml = sets.map((s, si) => `
-        <div class="set-row">
-          <span class="set-num">${si+1}</span>
-          <input type="number" inputmode="decimal" placeholder="lbs" value="${s.weight || ''}" ${disabled} onchange="updateSet(${idx},'${esc(name)}',${si},'weight',this.value)" />
-          <span class="unit">lbs</span>
-          <input type="number" inputmode="numeric" placeholder="reps" value="${s.reps || ''}" ${disabled} onchange="updateSet(${idx},'${esc(name)}',${si},'reps',this.value)" />
-          <span class="unit">reps</span>
-          ${completed ? '' : `<button class="remove-set" onclick="removeSet(${idx},'${esc(name)}',${si})">&#215;</button>`}
-        </div>
-      `).join('');
+      const setsHtml = sets.map((s, si) => {
+        const prevW = getPrevWeight(currentDay, name, si, dateKey);
+        const prevDisplay = prevW ? prevW : '—';
+        const prevClass = prevW ? '' : 'empty';
+        const removeBtn = (completed || sets.length <= 1) ? '' : `<button class="remove-set" onclick="removeSet(${idx},'${esc(name)}',${si})">&#215;</button>`;
+        return `
+          <div class="set-row">
+            <span class="set-num">${si+1}</span>
+            <span class="prev-weight-box ${prevClass}" title="Last time">${prevDisplay}</span>
+            <input type="number" inputmode="decimal" placeholder="lbs" value="${s.weight || ''}" ${disabled} onchange="updateSet(${idx},'${esc(name)}',${si},'weight',this.value)" />
+            <span class="unit">lbs</span>
+            <input type="number" inputmode="numeric" placeholder="reps" value="${s.reps || ''}" ${disabled} onchange="updateSet(${idx},'${esc(name)}',${si},'reps',this.value)" />
+            <span class="unit">reps</span>
+            ${removeBtn}
+          </div>
+        `;
+      }).join('');
 
       const addBtn = completed ? '' : `<button class="btn-add-set" onclick="addSet(${idx},'${esc(name)}')">+ Add Set</button>`;
-      body = `<div class="exercise-body">${prevHtml}${setsHtml}${addBtn}</div>`;
+
+      const effortHtml = `
+        <div class="effort-row">
+          <span class="effort-label">Effort:</span>
+          <button class="effort-btn ${currentEffort === 'lower' ? 'selected' : ''}" ${disabled} onclick="setEffort('${esc(name)}','lower')">Lower</button>
+          <button class="effort-btn ${currentEffort === 'stay' ? 'selected' : ''}" ${disabled} onclick="setEffort('${esc(name)}','stay')">Stay Here</button>
+          <button class="effort-btn ${currentEffort === 'progress' ? 'selected' : ''}" ${disabled} onclick="setEffort('${esc(name)}','progress')">Progress</button>
+        </div>
+      `;
+
+      body = `<div class="exercise-body">${prevHtml}${setsHtml}${addBtn}${effortHtml}</div>`;
     }
 
+    const skipBtn = completed
+      ? ''
+      : (isSkipped
+          ? `<button class="btn-skip undo" onclick="event.stopPropagation();toggleSkip('${esc(name)}')">Undo Skip</button>`
+          : `<button class="btn-skip" onclick="event.stopPropagation();toggleSkip('${esc(name)}')">Skip</button>`);
+
+    const setsLabel = isSkipped ? '' : `<span style="font-size:13px;color:var(--text2)">${sets.length} set${sets.length !== 1 ? 's' : ''}</span>`;
+
     return `
-      <div class="exercise-card">
+      <div class="exercise-card ${isSkipped ? 'skipped' : ''}">
         <div class="exercise-header" onclick="toggleExercise(${idx})">
-          <span class="exercise-name">${name}</span>
+          <span class="exercise-name">${name}${isSkipped ? '<span class="skip-tag">(skipped)</span>' : ''}</span>
           <div class="exercise-actions">
-            <span style="font-size:13px;color:var(--text2)">${sets.length} set${sets.length !== 1 ? 's' : ''}</span>
+            ${setsLabel}
+            ${skipBtn}
           </div>
         </div>
         ${body}
@@ -708,7 +939,6 @@ function renderDay() {
     `;
   }).join('');
 
-  // Actions: Finish / Edit button
   const actionsEl = document.getElementById('day-actions');
   if (completed) {
     actionsEl.innerHTML = '<button class="btn-outline" onclick="editWorkout()">Edit Workout</button>';
@@ -718,16 +948,47 @@ function renderDay() {
 }
 
 function finishWorkout() {
-  setCompleted(currentDay, true);
+  setCompleted(currentDay, true, currentDate);
+  playFinishAnimation();
   renderDay();
 }
 
 function editWorkout() {
-  setCompleted(currentDay, false);
+  setCompleted(currentDay, false, currentDate);
   renderDay();
 }
 
-function esc(s) { return s.replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+function playFinishAnimation() {
+  const overlay = document.getElementById('finish-overlay');
+  // Clear old confetti
+  overlay.querySelectorAll('.confetti').forEach(c => c.remove());
+
+  // Add confetti pieces
+  const colors = ['#d4a519', '#3b5dc9', '#e6b933', '#5577e0', '#ffd75e'];
+  for (let i = 0; i < 24; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.background = colors[i % colors.length];
+    const angle = (i / 24) * Math.PI * 2;
+    const dist = 120 + Math.random() * 100;
+    c.style.setProperty('--cx', Math.cos(angle) * dist + 'px');
+    c.style.setProperty('--cy', Math.sin(angle) * dist + 'px');
+    c.style.setProperty('--cr', (Math.random() * 720 - 360) + 'deg');
+    c.style.animationDelay = (Math.random() * 0.15) + 's';
+    overlay.appendChild(c);
+  }
+
+  overlay.classList.remove('active');
+  // Force reflow so animation restarts
+  void overlay.offsetWidth;
+  overlay.classList.add('active');
+
+  setTimeout(() => {
+    overlay.classList.remove('active');
+  }, 1700);
+}
+
+function esc(s) { return String(s).replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
 
 function formatDate(d) {
   const parts = d.split('-');
@@ -740,70 +1001,50 @@ function toggleExercise(idx) {
   renderDay();
 }
 
-function addExercise() {
-  const input = document.getElementById('new-exercise-input');
-  const name = input.value.trim();
-  if (!name) return;
-  const plan = getWeekPlan();
-  plan[currentDay].exercises.push({ name, targetSets: 3, targetReps: 10 });
-  savePlan(plan);
-  input.value = '';
+function toggleSkip(exerciseName) {
+  const log = getDayLog(currentDay, currentDate);
+  const key = '_skipped_' + exerciseName;
+  log[key] = !log[key];
+  saveDayLog(currentDay, log, currentDate);
   renderDay();
 }
 
-function removeExercise(idx) {
-  const plan = getWeekPlan();
-  plan[currentDay].exercises.splice(idx, 1);
-  savePlan(plan);
-  expandedExercises.delete(idx);
+function setEffort(exerciseName, value) {
+  const log = getDayLog(currentDay, currentDate);
+  const key = '_effort_' + exerciseName;
+  // Toggle off if already selected
+  if (log[key] === value) delete log[key];
+  else log[key] = value;
+  saveDayLog(currentDay, log, currentDate);
   renderDay();
-}
-
-function renameExercise(idx) {
-  const plan = getWeekPlan();
-  const oldName = plan[currentDay].exercises[idx].name;
-  openModal('Rename Exercise', oldName, (newName) => {
-    if (!newName.trim()) return;
-    plan[currentDay].exercises[idx].name = newName.trim();
-    savePlan(plan);
-    const logs = getLogs();
-    for (const date in logs) {
-      if (logs[date][currentDay] && logs[date][currentDay][oldName]) {
-        logs[date][currentDay][newName.trim()] = logs[date][currentDay][oldName];
-        delete logs[date][currentDay][oldName];
-      }
-    }
-    saveLogs(logs);
-    renderDay();
-  });
 }
 
 function addSet(idx, exerciseName) {
-  const dateKey = getDateKey();
-  const log = getDayLog(currentDay, dateKey);
-  if (!log[exerciseName]) log[exerciseName] = [];
-  log[exerciseName].push({ weight: '', reps: '' });
-  saveDayLog(currentDay, log, dateKey);
+  const log = getDayLog(currentDay, currentDate);
+  if (!Array.isArray(log[exerciseName])) log[exerciseName] = [];
+  const plan = getWeekPlan();
+  const ex = plan[currentDay].exercises[idx];
+  const targetReps = ex ? ex.targetReps : DEFAULT_REPS;
+  log[exerciseName].push({ weight: '', reps: targetReps });
+  saveDayLog(currentDay, log, currentDate);
   renderDay();
 }
 
 function removeSet(idx, exerciseName, setIdx) {
-  const dateKey = getDateKey();
-  const log = getDayLog(currentDay, dateKey);
-  if (log[exerciseName]) {
+  const log = getDayLog(currentDay, currentDate);
+  if (Array.isArray(log[exerciseName])) {
     log[exerciseName].splice(setIdx, 1);
-    saveDayLog(currentDay, log, dateKey);
+    saveDayLog(currentDay, log, currentDate);
     renderDay();
   }
 }
 
 function updateSet(idx, exerciseName, setIdx, field, value) {
-  const dateKey = getDateKey();
-  const log = getDayLog(currentDay, dateKey);
-  if (!log[exerciseName]) log[exerciseName] = [];
+  const log = getDayLog(currentDay, currentDate);
+  if (!Array.isArray(log[exerciseName])) log[exerciseName] = [];
   if (!log[exerciseName][setIdx]) log[exerciseName][setIdx] = { weight: '', reps: '' };
   log[exerciseName][setIdx][field] = value;
-  saveDayLog(currentDay, log, dateKey);
+  saveDayLog(currentDay, log, currentDate);
 }
 
 // ---- Day Label ----
@@ -867,7 +1108,7 @@ function planAddExercise(dayIdx) {
   const name = input.value.trim();
   if (!name) return;
   const plan = getWeekPlan();
-  plan[dayIdx].exercises.push({ name, targetSets: 3, targetReps: 10 });
+  plan[dayIdx].exercises.push({ name, targetSets: DEFAULT_SETS, targetReps: DEFAULT_REPS });
   savePlan(plan);
   input.value = '';
   renderPlan();
@@ -892,6 +1133,19 @@ function planRenameExercise(dayIdx, exIdx) {
       if (logs[date][dayIdx] && logs[date][dayIdx][oldName]) {
         logs[date][dayIdx][newName.trim()] = logs[date][dayIdx][oldName];
         delete logs[date][dayIdx][oldName];
+      }
+      // migrate effort/skipped keys too
+      const oldEffort = '_effort_' + oldName;
+      const newEffort = '_effort_' + newName.trim();
+      if (logs[date][dayIdx] && logs[date][dayIdx][oldEffort] !== undefined) {
+        logs[date][dayIdx][newEffort] = logs[date][dayIdx][oldEffort];
+        delete logs[date][dayIdx][oldEffort];
+      }
+      const oldSkipped = '_skipped_' + oldName;
+      const newSkipped = '_skipped_' + newName.trim();
+      if (logs[date][dayIdx] && logs[date][dayIdx][oldSkipped] !== undefined) {
+        logs[date][dayIdx][newSkipped] = logs[date][dayIdx][oldSkipped];
+        delete logs[date][dayIdx][oldSkipped];
       }
     }
     saveLogs(logs);
@@ -933,7 +1187,7 @@ function renderProgress() {
   const dates = Object.keys(logs).sort();
   for (const date of dates) {
     for (const di of dayIndices) {
-      if (logs[date] && logs[date][di] && logs[date][di][exerciseName]) {
+      if (logs[date] && logs[date][di] && Array.isArray(logs[date][di][exerciseName])) {
         const sets = logs[date][di][exerciseName].filter(s => s.weight || s.reps);
         if (sets.length > 0) entries.push({ date, sets });
       }
@@ -994,7 +1248,7 @@ function drawChart(data) {
 
   ctx.clearRect(0, 0, w, h);
 
-  ctx.strokeStyle = '#2a2a4a';
+  ctx.strokeStyle = '#2a3a5a';
   ctx.lineWidth = 0.5;
   for (let i = 0; i <= 4; i++) {
     const y = pad.top + ch - (ch * i / 4);
@@ -1002,7 +1256,7 @@ function drawChart(data) {
     ctx.moveTo(pad.left, y);
     ctx.lineTo(w - pad.right, y);
     ctx.stroke();
-    ctx.fillStyle = '#666';
+    ctx.fillStyle = '#8a9ab5';
     ctx.font = '10px system-ui';
     ctx.textAlign = 'right';
     ctx.fillText(Math.round(minW + range * i / 4), pad.left - 4, y + 3);
@@ -1011,14 +1265,14 @@ function drawChart(data) {
   if (data.length === 1) {
     const x = pad.left + cw / 2;
     const y = pad.top + ch / 2;
-    ctx.fillStyle = '#6c63ff';
+    ctx.fillStyle = '#3b5dc9';
     ctx.beginPath();
     ctx.arc(x, y, 4, 0, Math.PI * 2);
     ctx.fill();
     return;
   }
 
-  ctx.strokeStyle = '#6c63ff';
+  ctx.strokeStyle = '#3b5dc9';
   ctx.lineWidth = 2;
   ctx.beginPath();
   data.forEach((d, i) => {
@@ -1032,13 +1286,13 @@ function drawChart(data) {
   data.forEach((d, i) => {
     const x = pad.left + (cw * i / (data.length - 1));
     const y = pad.top + ch - (ch * (d.maxWeight - minW) / range);
-    ctx.fillStyle = '#6c63ff';
+    ctx.fillStyle = '#3b5dc9';
     ctx.beginPath();
     ctx.arc(x, y, 3, 0, Math.PI * 2);
     ctx.fill();
   });
 
-  ctx.fillStyle = '#666';
+  ctx.fillStyle = '#8a9ab5';
   ctx.font = '10px system-ui';
   ctx.textAlign = 'start';
   ctx.fillText(formatDate(data[0].date), pad.left, h - 4);
@@ -1076,7 +1330,7 @@ function closeModal() {
 const initTodayIdx = getTodayDayIndex();
 const initTodayPlan = getWeekPlan()[initTodayIdx];
 if (initTodayPlan.exercises.length > 0) {
-  openDay(initTodayIdx);
+  openDay(initTodayIdx, getDateKey());
 } else {
   renderWeek();
 }
