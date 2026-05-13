@@ -89,7 +89,122 @@ input:disabled {
 /* Pages */
 .page { display: none; padding: 16px 16px 80px; max-width: 600px; margin: 0 auto; }
 .page.active { display: block; }
-.page-title { font-size: 24px; font-weight: 700; margin-bottom: 16px; }
+.page-title { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+.page-subtitle { font-size: 13px; color: var(--text2); margin-bottom: 18px; }
+
+/* Home dashboard */
+.today-hero {
+  background: linear-gradient(135deg, var(--accent) 0%, #2b4596 100%);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.today-hero.done {
+  background: linear-gradient(135deg, var(--success) 0%, #a8851a 100%);
+  color: #1a1410;
+}
+.today-hero.rest {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.today-hero .hero-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.today-hero .hero-name {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.today-hero .hero-meta {
+  font-size: 13px;
+  opacity: 0.85;
+  margin-bottom: 14px;
+}
+.today-hero .hero-btn {
+  background: rgba(255,255,255,0.95);
+  color: #1a1410;
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-size: 15px;
+  font-weight: 700;
+  width: 100%;
+  display: block;
+  text-align: center;
+}
+.today-hero .hero-btn:active { background: rgba(255,255,255,0.8); }
+.today-hero.rest .hero-btn { background: var(--surface2); color: var(--text); }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+}
+.stat-num {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+}
+.stat-num.gold { color: var(--success2); }
+.stat-label {
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 2px;
+}
+.stat-sub {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 4px;
+}
+
+.upcoming-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  cursor: pointer;
+}
+.upcoming-card:active { border-color: var(--accent); }
+.upcoming-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text2);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.upcoming-name {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.upcoming-meta {
+  font-size: 12px;
+  color: var(--text2);
+}
+.section-heading {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 10px 0 8px;
+}
 
 /* Week navigation */
 .week-nav {
@@ -279,6 +394,19 @@ input:disabled {
   padding: 8px 0;
 }
 
+/* Effort callout from last session */
+.effort-callout {
+  background: var(--surface2);
+  border-left: 3px solid var(--accent);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 12px;
+}
+.effort-callout strong { color: var(--text); font-weight: 600; }
+.effort-callout .callout-date { font-size: 11px; opacity: 0.7; }
+
 /* Effort rating */
 .effort-row {
   display: flex;
@@ -423,6 +551,31 @@ input:disabled {
 }
 
 /* Progress */
+.chart-label {
+  font-size: 12px;
+  color: var(--text2);
+  margin-bottom: 4px;
+  text-align: center;
+}
+.progress-summary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+.ps-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: var(--text2);
+  padding: 4px 0;
+}
+.ps-row strong { color: var(--text); font-weight: 600; }
+.ps-row.up strong { color: var(--success2); }
+.ps-row.down strong { color: var(--danger); }
+
 .history-entry {
   padding: 8px 0;
   border-bottom: 1px solid var(--border);
@@ -532,7 +685,26 @@ select {
 </head>
 <body>
 
-<div id="page-week" class="page active">
+<div id="page-home" class="page active">
+  <h1 class="page-title" id="home-greeting">Hello</h1>
+  <div class="page-subtitle" id="home-date"></div>
+  <div id="home-today-hero"></div>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-num gold" id="home-streak">0</div>
+      <div class="stat-label">Day Streak</div>
+      <div class="stat-sub" id="home-streak-sub"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="home-week-progress">0/0</div>
+      <div class="stat-label">This Week</div>
+      <div class="stat-sub" id="home-week-sub"></div>
+    </div>
+  </div>
+  <div id="home-upcoming"></div>
+</div>
+
+<div id="page-week" class="page">
   <h1 class="page-title">Workouts</h1>
   <div class="week-nav">
     <button class="week-nav-arrow" onclick="changeWeek(-1)">&#8249;</button>
@@ -566,7 +738,11 @@ select {
 </div>
 
 <nav class="nav">
-  <button class="active" onclick="showPage('week')" data-page="week">
+  <button class="active" onclick="showPage('home')" data-page="home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>
+    Home
+  </button>
+  <button onclick="showPage('week')" data-page="week">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="4" x2="9" y2="2"/><line x1="15" y1="4" x2="15" y2="2"/></svg>
     Week
   </button>
@@ -702,6 +878,82 @@ function getPrevWeight(dayIndex, exerciseName, setIdx, beforeDate) {
   return '';
 }
 
+// Get previous effort rating for an exercise
+function getLastEffort(dayIndex, exerciseName, beforeDate) {
+  const logs = getLogs();
+  const cutoff = beforeDate || getDateKey();
+  const dates = Object.keys(logs).filter(d => d < cutoff).sort().reverse();
+  for (const date of dates) {
+    if (logs[date] && logs[date][dayIndex]) {
+      const eff = logs[date][dayIndex]['_effort_' + exerciseName];
+      if (eff) return { effort: eff, date };
+    }
+  }
+  return null;
+}
+
+// Compute total volume for a session: sum of weight * reps
+function computeVolume(sets) {
+  return sets.reduce((sum, s) => sum + (parseFloat(s.weight) || 0) * (parseInt(s.reps) || 0), 0);
+}
+
+// Streak: consecutive days with completed workouts, skipping rest days
+function getStreak() {
+  const plan = getWeekPlan();
+  let streak = 0;
+  const d = new Date();
+  const todayKey = getDateKey();
+  for (let i = 0; i < 365; i++) {
+    const dayIdx = (d.getDay() === 0 ? 6 : d.getDay() - 1);
+    const day = plan[dayIdx];
+    const dateKey = getDateKey(d);
+    if (day.exercises.length === 0) {
+      // Rest day: skip, doesn't affect streak
+      d.setDate(d.getDate() - 1);
+      continue;
+    }
+    if (isCompleted(dayIdx, dateKey)) {
+      streak++;
+      d.setDate(d.getDate() - 1);
+    } else if (dateKey === todayKey) {
+      // Today not done yet — don't break the streak
+      d.setDate(d.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+// This week's stats: completed / total scheduled (with exercises)
+function getThisWeekStats() {
+  const plan = getWeekPlan();
+  const weekKeys = getWeekDateKeys(0);
+  let scheduled = 0, completed = 0;
+  plan.forEach((d, i) => {
+    if (d.exercises.length > 0) {
+      scheduled++;
+      if (isCompleted(i, weekKeys[i])) completed++;
+    }
+  });
+  return { scheduled, completed };
+}
+
+// Find the next upcoming workout day after today
+function getUpcomingWorkout() {
+  const plan = getWeekPlan();
+  const todayIdx = getTodayDayIndex();
+  for (let offset = 1; offset <= 7; offset++) {
+    const idx = (todayIdx + offset) % 7;
+    if (plan[idx].exercises.length > 0) {
+      const d = new Date();
+      d.setDate(d.getDate() + offset);
+      return { dayIndex: idx, day: plan[idx], dateKey: getDateKey(d), daysAway: offset };
+    }
+  }
+  return null;
+}
+
 // Sync the day's log with current plan (preload missing sets with prev weights)
 function syncDayWithPlan(dayIndex, dateKey) {
   const key = dateKey || getDateKey();
@@ -743,6 +995,7 @@ function showPage(page) {
   document.querySelectorAll('.nav button').forEach(b => {
     b.classList.toggle('active', b.dataset.page === page);
   });
+  if (page === 'home') renderHome();
   if (page === 'week') { currentDay = null; currentDate = null; renderWeek(); }
   if (page === 'progress') renderProgressSelect();
   if (page === 'plan') renderPlan();
@@ -770,6 +1023,89 @@ function changeWeek(delta) {
 function goToCurrentWeek() {
   weekOffset = 0;
   renderWeek();
+}
+
+// ---- Render: Home ----
+function renderHome() {
+  const now = new Date();
+  const hour = now.getHours();
+  let greeting;
+  if (hour < 5) greeting = 'Up Late';
+  else if (hour < 12) greeting = 'Good Morning';
+  else if (hour < 17) greeting = 'Good Afternoon';
+  else greeting = 'Good Evening';
+  document.getElementById('home-greeting').textContent = greeting;
+  document.getElementById('home-date').textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  const plan = getWeekPlan();
+  const todayIdx = getTodayDayIndex();
+  const today = plan[todayIdx];
+  const todayKey = getDateKey();
+  const todayDone = isCompleted(todayIdx, todayKey);
+
+  // Today hero
+  const heroEl = document.getElementById('home-today-hero');
+  if (today.exercises.length === 0) {
+    heroEl.innerHTML = `
+      <div class="today-hero rest">
+        <div class="hero-label">Today</div>
+        <div class="hero-name">${today.day}${today.label ? ' — ' + today.label : ' — Rest Day'}</div>
+        <div class="hero-meta">No workout scheduled. Enjoy the recovery.</div>
+      </div>
+    `;
+  } else {
+    // Count logged exercises so far
+    const log = getDayLog(todayIdx, todayKey);
+    let loggedCount = 0;
+    today.exercises.forEach(ex => {
+      if (Array.isArray(log[ex.name]) && log[ex.name].some(s => s.weight || s.reps)) loggedCount++;
+    });
+    let metaText, btnText;
+    if (todayDone) {
+      metaText = `${today.exercises.length} exercise${today.exercises.length !== 1 ? 's' : ''} · Complete`;
+      btnText = 'Review Workout';
+    } else if (loggedCount > 0) {
+      metaText = `${today.exercises.length} exercise${today.exercises.length !== 1 ? 's' : ''} · In progress`;
+      btnText = 'Continue Workout';
+    } else {
+      metaText = `${today.exercises.length} exercise${today.exercises.length !== 1 ? 's' : ''} · Ready to start`;
+      btnText = 'Start Workout';
+    }
+    heroEl.innerHTML = `
+      <div class="today-hero ${todayDone ? 'done' : ''}">
+        <div class="hero-label">Today's Workout</div>
+        <div class="hero-name">${today.label || today.day}</div>
+        <div class="hero-meta">${metaText}</div>
+        <button class="hero-btn" onclick="openDay(${todayIdx}, '${todayKey}')">${btnText}</button>
+      </div>
+    `;
+  }
+
+  // Streak
+  const streak = getStreak();
+  document.getElementById('home-streak').textContent = streak;
+  document.getElementById('home-streak-sub').textContent = streak === 0 ? "Let's get started" : (streak === 1 ? 'workout day' : 'workout days');
+
+  // This week
+  const wk = getThisWeekStats();
+  document.getElementById('home-week-progress').textContent = wk.completed + '/' + wk.scheduled;
+  document.getElementById('home-week-sub').textContent = (wk.scheduled === 0 ? 'No workouts planned' : (wk.completed === wk.scheduled ? 'All done!' : 'workouts completed'));
+
+  // Upcoming
+  const upcoming = getUpcomingWorkout();
+  const upcomingEl = document.getElementById('home-upcoming');
+  if (upcoming) {
+    const dayName = upcoming.daysAway === 1 ? 'Tomorrow' : upcoming.day.day;
+    upcomingEl.innerHTML = `
+      <div class="upcoming-card" onclick="openDay(${upcoming.dayIndex}, '${upcoming.dateKey}')">
+        <div class="upcoming-label">Coming Up</div>
+        <div class="upcoming-name">${dayName}${upcoming.day.label ? ' — ' + upcoming.day.label : ''}</div>
+        <div class="upcoming-meta">${upcoming.day.exercises.length} exercise${upcoming.day.exercises.length !== 1 ? 's' : ''}</div>
+      </div>
+    `;
+  } else {
+    upcomingEl.innerHTML = '';
+  }
 }
 
 // ---- Render: Week ----
@@ -878,9 +1214,12 @@ function renderDay() {
     let body = '';
     if (isOpen && !isSkipped) {
       let prevHtml = '';
-      if (prevLog) {
-        prevHtml = `<div class="prev-label">Last time (${formatDate(prevLog.date)}):</div><div class="prev-sets">${prevLog.sets.map((s, i) => `Set ${i+1}: ${s.weight || 0}lbs &times; ${s.reps || 0}`).join('<br>')}</div>`;
-      } else {
+      const prevEffort = getLastEffort(currentDay, name, dateKey);
+      if (prevEffort) {
+        const labels = { lower: 'Lower', stay: 'Stay Here', progress: 'Progress' };
+        const icons = { lower: '&darr;', stay: '&rarr;', progress: '&uarr;' };
+        prevHtml = `<div class="effort-callout">${icons[prevEffort.effort]} Last week: <strong>${labels[prevEffort.effort]}</strong> <span class="callout-date">(${formatDate(prevEffort.date)})</span></div>`;
+      } else if (!prevLog) {
         prevHtml = '<div class="prev-label">No previous data</div>';
       }
 
@@ -1202,18 +1541,34 @@ function renderProgress() {
 
   const chartData = entries.map(e => ({
     date: e.date,
-    maxWeight: Math.max(...e.sets.map(s => parseFloat(s.weight) || 0)),
-    totalVolume: e.sets.reduce((sum, s) => sum + (parseFloat(s.weight) || 0) * (parseInt(s.reps) || 0), 0)
+    volume: e.sets.reduce((sum, s) => sum + (parseFloat(s.weight) || 0) * (parseInt(s.reps) || 0), 0)
   }));
 
-  let html = `<div class="chart-container"><canvas id="progress-chart"></canvas></div>`;
+  // Latest vs previous volume comparison
+  let summaryHtml = '';
+  if (chartData.length >= 2) {
+    const latest = chartData[chartData.length - 1].volume;
+    const prev = chartData[chartData.length - 2].volume;
+    const diff = latest - prev;
+    const pct = prev > 0 ? Math.round((diff / prev) * 100) : 0;
+    const arrow = diff > 0 ? '&uarr;' : (diff < 0 ? '&darr;' : '&rarr;');
+    const cls = diff > 0 ? 'up' : (diff < 0 ? 'down' : '');
+    summaryHtml = `<div class="progress-summary"><div class="ps-row"><span>Total volume (latest)</span><strong>${Math.round(latest).toLocaleString()} lbs</strong></div><div class="ps-row ${cls}"><span>vs. previous session</span><strong>${arrow} ${diff >= 0 ? '+' : ''}${Math.round(diff).toLocaleString()} lbs (${pct >= 0 ? '+' : ''}${pct}%)</strong></div></div>`;
+  } else if (chartData.length === 1) {
+    summaryHtml = `<div class="progress-summary"><div class="ps-row"><span>Total volume</span><strong>${Math.round(chartData[0].volume).toLocaleString()} lbs</strong></div></div>`;
+  }
 
-  html += entries.slice().reverse().map(e => `
+  let html = `<div class="chart-label">Total volume per session (lbs × reps)</div><div class="chart-container"><canvas id="progress-chart"></canvas></div>${summaryHtml}`;
+
+  html += entries.slice().reverse().map(e => {
+    const vol = e.sets.reduce((sum, s) => sum + (parseFloat(s.weight) || 0) * (parseInt(s.reps) || 0), 0);
+    return `
     <div class="history-entry">
-      <div class="history-date">${formatDateFull(e.date)}</div>
+      <div class="history-date">${formatDateFull(e.date)} &middot; <span style="color:var(--text)">${Math.round(vol).toLocaleString()} lbs total</span></div>
       <div class="history-sets">${e.sets.map((s, i) => `Set ${i+1}: ${s.weight || 0}lbs x ${s.reps || 0}`).join(' &nbsp;|&nbsp; ')}</div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 
   content.innerHTML = html;
   drawChart(chartData);
@@ -1241,7 +1596,7 @@ function drawChart(data) {
   const cw = w - pad.left - pad.right;
   const ch = h - pad.top - pad.bottom;
 
-  const weights = data.map(d => d.maxWeight);
+  const weights = data.map(d => d.volume);
   const minW = Math.min(...weights);
   const maxW = Math.max(...weights);
   const range = maxW - minW || 1;
@@ -1277,7 +1632,7 @@ function drawChart(data) {
   ctx.beginPath();
   data.forEach((d, i) => {
     const x = pad.left + (cw * i / (data.length - 1));
-    const y = pad.top + ch - (ch * (d.maxWeight - minW) / range);
+    const y = pad.top + ch - (ch * (d.volume - minW) / range);
     if (i === 0) ctx.moveTo(x, y);
     else ctx.lineTo(x, y);
   });
@@ -1285,7 +1640,7 @@ function drawChart(data) {
 
   data.forEach((d, i) => {
     const x = pad.left + (cw * i / (data.length - 1));
-    const y = pad.top + ch - (ch * (d.maxWeight - minW) / range);
+    const y = pad.top + ch - (ch * (d.volume - minW) / range);
     ctx.fillStyle = '#3b5dc9';
     ctx.beginPath();
     ctx.arc(x, y, 3, 0, Math.PI * 2);
@@ -1327,13 +1682,7 @@ function closeModal() {
 }
 
 // ---- Init ----
-const initTodayIdx = getTodayDayIndex();
-const initTodayPlan = getWeekPlan()[initTodayIdx];
-if (initTodayPlan.exercises.length > 0) {
-  openDay(initTodayIdx, getDateKey());
-} else {
-  renderWeek();
-}
+renderHome();
 
 // Service worker registration
 if ('serviceWorker' in navigator) {
