@@ -5,25 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0f1a2e">
+<meta name="theme-color" content="#0b0b0c">
 <title>Workout Tracker</title>
 <link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 :root {
-  --bg: #0a1020;
-  --surface: #131e35;
-  --surface2: #1d2a44;
-  --border: #2a3a5a;
-  --text: #e5e9f2;
-  --text2: #8a9ab5;
-  --accent: #3b5dc9;       /* navy */
-  --accent2: #5577e0;
-  --accent-soft: #1d2c4f;
-  --danger: #ff4757;
-  --success: #d4a519;      /* gold */
-  --success2: #e6b933;
-  --success-soft: #3a2d0a;
+  --bg: #0b0b0c;           /* matte black */
+  --surface: #151517;      /* iron */
+  --surface2: #1f1f23;     /* steel */
+  --border: #2c2c31;
+  --text: #f4f3ef;         /* chalk */
+  --text2: #98978f;
+  --accent: #f2b90d;       /* gold */
+  --accent2: #ffd043;
+  --accent-soft: #2b230a;
+  --danger: #e5484d;
+  --success: #f2b90d;      /* gold */
+  --success2: #ffd043;
+  --success-soft: #2b230a;
+  --display: 'Oswald', 'AvenirNextCondensed-Bold', 'HelveticaNeue-CondensedBold', 'Arial Narrow', sans-serif;
 }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
@@ -89,38 +93,63 @@ input:disabled {
 /* Pages */
 .page { display: none; padding: 16px 16px 80px; max-width: 600px; margin: 0 auto; }
 .page.active { display: block; }
-.page-title { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
-.page-subtitle { font-size: 13px; color: var(--text2); margin-bottom: 18px; }
+.page-title {
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+}
+.page-subtitle { font-size: 13px; color: var(--text2); margin-bottom: 18px; text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px; font-weight: 600; }
 
 /* Home dashboard */
 .today-hero {
-  background: linear-gradient(135deg, var(--accent) 0%, #2b4596 100%);
-  border-radius: 14px;
+  background: linear-gradient(160deg, #1d1d21 0%, #101012 100%);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 6px;
   padding: 20px;
   margin-bottom: 14px;
   position: relative;
   overflow: hidden;
 }
+.today-hero::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -70px;
+  width: 160px;
+  height: 220px;
+  background: repeating-linear-gradient(-45deg, var(--accent) 0 10px, transparent 10px 26px);
+  opacity: 0.06;
+  pointer-events: none;
+}
 .today-hero.done {
-  background: linear-gradient(135deg, var(--success) 0%, #a8851a 100%);
-  color: #1a1410;
+  background: linear-gradient(160deg, var(--accent2) 0%, #cf9c04 100%);
+  border-left-color: #0b0b0c;
+  color: #17130a;
 }
 .today-hero.rest {
   background: var(--surface);
   border: 1px solid var(--border);
+  border-left: 4px solid var(--border);
   color: var(--text);
 }
 .today-hero .hero-label {
-  font-size: 12px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  opacity: 0.85;
+  letter-spacing: 0.14em;
+  opacity: 0.8;
   margin-bottom: 6px;
   font-weight: 600;
 }
 .today-hero .hero-name {
-  font-size: 22px;
+  font-family: var(--display);
+  font-size: 26px;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
   margin-bottom: 4px;
 }
 .today-hero .hero-meta {
@@ -129,17 +158,21 @@ input:disabled {
   margin-bottom: 14px;
 }
 .today-hero .hero-btn {
-  background: rgba(255,255,255,0.95);
-  color: #1a1410;
-  border-radius: 10px;
-  padding: 12px 18px;
+  background: var(--accent);
+  color: #17130a;
+  border-radius: 4px;
+  padding: 13px 18px;
+  font-family: var(--display);
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   width: 100%;
   display: block;
   text-align: center;
 }
-.today-hero .hero-btn:active { background: rgba(255,255,255,0.8); }
+.today-hero .hero-btn:active { background: var(--accent2); }
+.today-hero.done .hero-btn { background: #17130a; color: var(--accent2); }
 .today-hero.rest .hero-btn { background: var(--surface2); color: var(--text); }
 
 .stats-grid {
@@ -151,11 +184,12 @@ input:disabled {
 .stat-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 6px;
   padding: 14px;
 }
 .stat-num {
-  font-size: 28px;
+  font-family: var(--display);
+  font-size: 30px;
   font-weight: 700;
   color: var(--text);
 }
@@ -174,7 +208,7 @@ input:disabled {
 .upcoming-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 6px;
   padding: 14px 16px;
   margin-bottom: 14px;
   cursor: pointer;
@@ -253,7 +287,8 @@ input:disabled {
 .day-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-left: 3px solid var(--border);
+  border-radius: 6px;
   padding: 14px 16px;
   margin-bottom: 10px;
   display: flex;
@@ -263,18 +298,20 @@ input:disabled {
   transition: border-color 0.2s;
 }
 .day-card:active { border-color: var(--accent); }
-.day-card.today { border-color: var(--accent2); }
-.day-card.completed { border-color: var(--success); }
+.day-card.today { border-left-color: var(--text); }
+.day-card.completed { border-left-color: var(--success); }
 .day-name { font-weight: 600; font-size: 15px; }
 .day-label { font-size: 13px; color: var(--text2); margin-top: 2px; }
 .day-count { font-size: 12px; color: var(--text2); }
 .day-status {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-weight: 600;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
-.day-status.done { background: var(--success); color: #000; }
+.day-status.done { background: var(--success); color: #17130a; }
 .day-status.pending { background: var(--surface2); color: var(--text2); }
 .arrow { color: var(--text2); font-size: 18px; }
 
@@ -294,7 +331,7 @@ input:disabled {
   justify-content: space-between;
   margin-bottom: 16px;
 }
-.day-header h2 { font-size: 20px; font-weight: 700; }
+.day-header h2 { font-family: var(--display); font-size: 24px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; }
 .label-edit {
   font-size: 13px;
   color: var(--accent2);
@@ -303,7 +340,7 @@ input:disabled {
 .exercise-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 6px;
   margin-bottom: 12px;
   overflow: hidden;
   transition: opacity 0.2s;
@@ -447,34 +484,44 @@ input:disabled {
 .add-exercise-row input { flex: 1; }
 .btn-primary {
   background: var(--accent);
-  color: #fff;
-  border-radius: 8px;
+  color: #17130a;
+  border-radius: 4px;
   padding: 10px 16px;
+  font-family: var(--display);
   font-size: 14px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   white-space: nowrap;
 }
 .btn-primary:active { background: var(--accent2); }
 .btn-success {
   background: var(--success);
-  color: #000;
-  border-radius: 8px;
-  padding: 12px 16px;
-  font-size: 15px;
-  font-weight: 700;
+  color: #17130a;
+  border-radius: 4px;
+  padding: 14px 16px;
+  font-family: var(--display);
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   width: 100%;
   margin-top: 16px;
 }
 .btn-success:active { background: var(--success2); }
 .btn-outline {
-  border: 1px solid var(--accent);
-  color: var(--accent2);
-  border-radius: 8px;
-  padding: 12px 16px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 13px 16px;
+  font-family: var(--display);
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   width: 100%;
-  margin-top: 16px;
+  margin-top: 12px;
+  background: var(--surface);
 }
 .btn-outline:active { background: var(--surface2); }
 .btn-danger { color: var(--danger); }
@@ -482,13 +529,55 @@ input:disabled {
 /* Completed banner */
 .completed-banner {
   background: var(--success);
-  color: #000;
+  color: #17130a;
   text-align: center;
   padding: 10px;
-  border-radius: 8px;
+  border-radius: 4px;
+  font-family: var(--display);
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
   margin-bottom: 12px;
+}
+.completed-banner .banner-duration {
+  display: block;
+  font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.75;
+  margin-top: 2px;
+}
+
+/* Workout timer */
+.timer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 12px;
+}
+.timer-bar .timer-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text2);
+  font-weight: 700;
+}
+.timer-bar .timer-value {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--accent2);
+  font-variant-numeric: tabular-nums;
+  min-width: 70px;
+  text-align: center;
 }
 
 /* Finish animation overlay */
@@ -498,7 +587,7 @@ input:disabled {
   display: none;
   align-items: center;
   justify-content: center;
-  background: rgba(10, 16, 32, 0.85);
+  background: rgba(11, 11, 12, 0.88);
   z-index: 300;
   pointer-events: none;
 }
@@ -515,7 +604,7 @@ input:disabled {
   align-items: center;
   justify-content: center;
   animation: popIn 0.5s cubic-bezier(0.22, 1.36, 0.6, 1.2) forwards;
-  box-shadow: 0 0 60px rgba(212, 165, 25, 0.6);
+  box-shadow: 0 0 60px rgba(242, 185, 13, 0.55);
 }
 .finish-check svg {
   width: 60px;
@@ -548,6 +637,95 @@ input:disabled {
 @keyframes confettiBurst {
   0% { transform: translate(0,0) rotate(0); opacity: 1; }
   100% { transform: translate(var(--cx), var(--cy)) rotate(var(--cr)); opacity: 0; }
+}
+
+/* Workout summary overlay */
+.summary-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 11, 12, 0.92);
+  z-index: 310;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.summary-overlay.active { display: flex; }
+.summary-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--accent);
+  border-radius: 6px;
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 380px;
+  animation: summaryIn 0.35s cubic-bezier(0.2, 1.1, 0.4, 1) forwards;
+}
+@keyframes summaryIn {
+  0% { transform: translateY(24px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.summary-card .summary-title {
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent2);
+  text-align: center;
+}
+.summary-card .summary-sub {
+  font-size: 12px;
+  color: var(--text2);
+  text-align: center;
+  margin: 4px 0 18px;
+}
+.summary-stats {
+  border-top: 1px solid var(--border);
+}
+.summary-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 2px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text2);
+}
+.summary-stat strong {
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+}
+.summary-stat strong.gold { color: var(--accent2); }
+.summary-card .btn-success { margin-top: 20px; }
+
+/* Drag to reorder (Plan tab) */
+.drag-handle {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text2);
+  font-size: 17px;
+  flex-shrink: 0;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface2);
+}
+.edit-exercise-item.dragging {
+  opacity: 0.92;
+  background: var(--surface2);
+  border: 1px dashed var(--accent);
+  border-radius: 4px;
+  position: relative;
+  z-index: 5;
 }
 
 /* Progress */
@@ -594,11 +772,11 @@ canvas { width: 100% !important; height: 100% !important; }
 .edit-section {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 6px;
   padding: 14px 16px;
   margin-bottom: 10px;
 }
-.edit-section .day-name { margin-bottom: 8px; }
+.edit-section .day-name { margin-bottom: 8px; font-family: var(--display); text-transform: uppercase; letter-spacing: 0.04em; font-size: 16px; }
 .edit-label-row {
   display: flex;
   gap: 8px;
@@ -650,7 +828,7 @@ canvas { width: 100% !important; height: 100% !important; }
 .modal {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 6px;
   padding: 20px;
   width: 100%;
   max-width: 360px;
@@ -759,9 +937,19 @@ select {
 <!-- Finish animation overlay -->
 <div class="finish-overlay" id="finish-overlay">
   <div class="finish-check">
-    <svg viewBox="0 0 50 50" fill="none" stroke="#000" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <svg viewBox="0 0 50 50" fill="none" stroke="#17130a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="12,26 22,36 38,16" />
     </svg>
+  </div>
+</div>
+
+<!-- Workout summary overlay -->
+<div class="summary-overlay" id="summary-overlay">
+  <div class="summary-card">
+    <div class="summary-title">Workout Complete</div>
+    <div class="summary-sub" id="summary-sub"></div>
+    <div class="summary-stats" id="summary-stats"></div>
+    <button class="btn-success" onclick="closeSummary()">Done</button>
   </div>
 </div>
 
@@ -990,6 +1178,7 @@ let expandedExercises = new Set();
 // ---- Navigation ----
 function showPage(page) {
   currentPage = page;
+  stopTimerTick();
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   document.querySelectorAll('.nav button').forEach(b => {
@@ -1188,8 +1377,17 @@ function renderDay() {
   const dateStr = viewedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
   document.getElementById('day-title').innerHTML = day.day + (day.label ? ' — ' + day.label : '') + '<div style="font-size:13px;color:var(--text2);font-weight:400;margin-top:2px">' + dateStr + '</div>';
 
+  const started = !!log._startTime && !completed;
   const bannerEl = document.getElementById('day-completed-banner');
-  bannerEl.innerHTML = completed ? '<div class="completed-banner">Workout Complete</div>' : '';
+  if (completed) {
+    const durHtml = log._duration ? '<span class="banner-duration">Completed in ' + formatDuration(log._duration) + '</span>' : '';
+    bannerEl.innerHTML = '<div class="completed-banner">Workout Complete' + durHtml + '</div>';
+  } else if (started) {
+    bannerEl.innerHTML = '<div class="timer-bar"><span class="timer-label">Workout Time</span><span class="timer-value" id="workout-timer">' + formatDuration(Math.floor((Date.now() - log._startTime) / 1000)) + '</span></div>';
+  } else {
+    bannerEl.innerHTML = '';
+  }
+  if (started) ensureTimerTick(); else stopTimerTick();
 
   const container = document.getElementById('day-exercises');
   if (day.exercises.length === 0) {
@@ -1281,20 +1479,101 @@ function renderDay() {
   const actionsEl = document.getElementById('day-actions');
   if (completed) {
     actionsEl.innerHTML = '<button class="btn-outline" onclick="editWorkout()">Edit Workout</button>';
-  } else {
+  } else if (started) {
     actionsEl.innerHTML = '<button class="btn-success" onclick="finishWorkout()">Finish Workout</button>';
+  } else {
+    actionsEl.innerHTML = '<button class="btn-success" onclick="startWorkout()">Start Workout</button>' +
+      '<button class="btn-outline" onclick="finishWorkout()">Finish Without Timer</button>';
   }
 }
 
+// ---- Workout timer ----
+let timerInterval = null;
+
+function formatDuration(totalSec) {
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  if (h > 0) return h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  return m + ':' + String(s).padStart(2, '0');
+}
+
+function ensureTimerTick() {
+  if (timerInterval) return;
+  timerInterval = setInterval(() => {
+    const el = document.getElementById('workout-timer');
+    if (!el || currentDay === null) { stopTimerTick(); return; }
+    const log = getDayLog(currentDay, currentDate);
+    if (!log._startTime || log._completed) { stopTimerTick(); return; }
+    el.textContent = formatDuration(Math.floor((Date.now() - log._startTime) / 1000));
+  }, 1000);
+}
+
+function stopTimerTick() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+function startWorkout() {
+  const log = getDayLog(currentDay, currentDate);
+  log._startTime = Date.now();
+  delete log._duration;
+  saveDayLog(currentDay, log, currentDate);
+  renderDay();
+}
+
 function finishWorkout() {
-  setCompleted(currentDay, true, currentDate);
+  const log = getDayLog(currentDay, currentDate);
+  if (log._startTime && !log._duration) {
+    log._duration = Math.max(1, Math.round((Date.now() - log._startTime) / 1000));
+  }
+  log._completed = true;
+  saveDayLog(currentDay, log, currentDate);
+  stopTimerTick();
   playFinishAnimation();
   renderDay();
+  setTimeout(showWorkoutSummary, 1500);
 }
 
 function editWorkout() {
   setCompleted(currentDay, false, currentDate);
   renderDay();
+}
+
+// ---- Workout summary ----
+function showWorkoutSummary() {
+  const plan = getWeekPlan();
+  const day = plan[currentDay];
+  const log = getDayLog(currentDay, currentDate);
+
+  let exercisesDone = 0, exercisesSkipped = 0, totalSets = 0, totalVolume = 0;
+  day.exercises.forEach(ex => {
+    if (log['_skipped_' + ex.name] === true) { exercisesSkipped++; return; }
+    const sets = Array.isArray(log[ex.name]) ? log[ex.name].filter(s => s.weight || s.reps) : [];
+    if (sets.length > 0) {
+      exercisesDone++;
+      totalSets += sets.length;
+      totalVolume += computeVolume(sets);
+    }
+  });
+
+  const viewedDate = new Date(currentDate + 'T00:00:00');
+  document.getElementById('summary-sub').textContent =
+    (day.label || day.day) + ' · ' + viewedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+  let rows = '';
+  if (log._duration) rows += '<div class="summary-stat"><span>Duration</span><strong class="gold">' + formatDuration(log._duration) + '</strong></div>';
+  rows += '<div class="summary-stat"><span>Exercises Completed</span><strong>' + exercisesDone + ' of ' + day.exercises.length + '</strong></div>';
+  if (exercisesSkipped > 0) rows += '<div class="summary-stat"><span>Skipped</span><strong>' + exercisesSkipped + '</strong></div>';
+  rows += '<div class="summary-stat"><span>Sets Logged</span><strong>' + totalSets + '</strong></div>';
+  rows += '<div class="summary-stat"><span>Total Volume</span><strong class="gold">' + Math.round(totalVolume).toLocaleString() + ' lbs</strong></div>';
+  document.getElementById('summary-stats').innerHTML = rows;
+
+  document.getElementById('summary-overlay').classList.add('active');
+}
+
+function closeSummary() {
+  document.getElementById('summary-overlay').classList.remove('active');
+  showPage('home');
 }
 
 function playFinishAnimation() {
@@ -1303,7 +1582,7 @@ function playFinishAnimation() {
   overlay.querySelectorAll('.confetti').forEach(c => c.remove());
 
   // Add confetti pieces
-  const colors = ['#d4a519', '#3b5dc9', '#e6b933', '#5577e0', '#ffd75e'];
+  const colors = ['#f2b90d', '#ffd043', '#f4f3ef', '#cf9c04', '#ffe28a'];
   for (let i = 0; i < 24; i++) {
     const c = document.createElement('div');
     c.className = 'confetti';
@@ -1405,8 +1684,10 @@ function renderPlan() {
       <div class="edit-label-row">
         <input value="${d.label}" placeholder="Label (e.g. Chest, Rest)" onchange="updateLabel(${i}, this.value)" />
       </div>
+      <div class="exercise-drag-list" data-day="${i}">
       ${d.exercises.map((ex, ei) => `
-        <div class="edit-exercise-item">
+        <div class="edit-exercise-item" data-idx="${ei}">
+          <span class="drag-handle" onpointerdown="startDrag(event, ${i})">&#8801;</span>
           <div class="edit-exercise-info">
             <div class="edit-exercise-name">${ex.name}</div>
             <div class="edit-exercise-targets">
@@ -1422,12 +1703,69 @@ function renderPlan() {
           </div>
         </div>
       `).join('')}
+      </div>
       <div class="add-exercise-row" style="margin-top:8px">
         <input id="plan-add-${i}" placeholder="Add exercise" />
         <button class="btn-primary" onclick="planAddExercise(${i})">Add</button>
       </div>
     </div>
   `).join('');
+}
+
+// ---- Drag to reorder (Plan tab) ----
+let dragState = null;
+
+function startDrag(e, dayIdx) {
+  e.preventDefault();
+  const item = e.target.closest('.edit-exercise-item');
+  if (!item) return;
+  const list = item.parentElement;
+  dragState = {
+    dayIdx,
+    item,
+    list,
+    fromIdx: parseInt(item.dataset.idx)
+  };
+  item.classList.add('dragging');
+  document.addEventListener('pointermove', onDragMove, { passive: false });
+  document.addEventListener('pointerup', endDrag);
+  document.addEventListener('pointercancel', endDrag);
+}
+
+function onDragMove(e) {
+  if (!dragState) return;
+  e.preventDefault();
+  const { item, list } = dragState;
+  const siblings = [...list.querySelectorAll('.edit-exercise-item')].filter(el => el !== item);
+  // Find the first sibling whose vertical midpoint is below the pointer
+  let next = null;
+  for (const sib of siblings) {
+    const rect = sib.getBoundingClientRect();
+    if (e.clientY < rect.top + rect.height / 2) { next = sib; break; }
+  }
+  if (next) list.insertBefore(item, next);
+  else list.appendChild(item);
+}
+
+function endDrag() {
+  if (!dragState) return;
+  const { dayIdx, item, list, fromIdx } = dragState;
+  item.classList.remove('dragging');
+  document.removeEventListener('pointermove', onDragMove);
+  document.removeEventListener('pointerup', endDrag);
+  document.removeEventListener('pointercancel', endDrag);
+
+  const newOrder = [...list.querySelectorAll('.edit-exercise-item')];
+  const toIdx = newOrder.indexOf(item);
+  dragState = null;
+
+  if (toIdx !== fromIdx && toIdx >= 0) {
+    const plan = getWeekPlan();
+    const [moved] = plan[dayIdx].exercises.splice(fromIdx, 1);
+    plan[dayIdx].exercises.splice(toIdx, 0, moved);
+    savePlan(plan);
+  }
+  renderPlan();
 }
 
 function updateLabel(dayIdx, val) {
@@ -1603,7 +1941,7 @@ function drawChart(data) {
 
   ctx.clearRect(0, 0, w, h);
 
-  ctx.strokeStyle = '#2a3a5a';
+  ctx.strokeStyle = '#2c2c31';
   ctx.lineWidth = 0.5;
   for (let i = 0; i <= 4; i++) {
     const y = pad.top + ch - (ch * i / 4);
@@ -1611,7 +1949,7 @@ function drawChart(data) {
     ctx.moveTo(pad.left, y);
     ctx.lineTo(w - pad.right, y);
     ctx.stroke();
-    ctx.fillStyle = '#8a9ab5';
+    ctx.fillStyle = '#98978f';
     ctx.font = '10px system-ui';
     ctx.textAlign = 'right';
     ctx.fillText(Math.round(minW + range * i / 4), pad.left - 4, y + 3);
@@ -1620,14 +1958,14 @@ function drawChart(data) {
   if (data.length === 1) {
     const x = pad.left + cw / 2;
     const y = pad.top + ch / 2;
-    ctx.fillStyle = '#3b5dc9';
+    ctx.fillStyle = '#f2b90d';
     ctx.beginPath();
     ctx.arc(x, y, 4, 0, Math.PI * 2);
     ctx.fill();
     return;
   }
 
-  ctx.strokeStyle = '#3b5dc9';
+  ctx.strokeStyle = '#f2b90d';
   ctx.lineWidth = 2;
   ctx.beginPath();
   data.forEach((d, i) => {
@@ -1641,13 +1979,13 @@ function drawChart(data) {
   data.forEach((d, i) => {
     const x = pad.left + (cw * i / (data.length - 1));
     const y = pad.top + ch - (ch * (d.volume - minW) / range);
-    ctx.fillStyle = '#3b5dc9';
+    ctx.fillStyle = '#f2b90d';
     ctx.beginPath();
     ctx.arc(x, y, 3, 0, Math.PI * 2);
     ctx.fill();
   });
 
-  ctx.fillStyle = '#8a9ab5';
+  ctx.fillStyle = '#98978f';
   ctx.font = '10px system-ui';
   ctx.textAlign = 'start';
   ctx.fillText(formatDate(data[0].date), pad.left, h - 4);
